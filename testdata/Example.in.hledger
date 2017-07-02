@@ -1,0 +1,7 @@
+1990/01/01 Chickens
+    Assets:Chickens  1 CHICKEN @ 5 AUD
+    Assets:Savings   -5 AUD
+
+1990/01/01 Chickens ; chicken
+  Assets:Chickens  1 CHICKEN @ 5 AUD
+  Assets:Savings   -5 AUD
