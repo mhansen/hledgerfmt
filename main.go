@@ -14,27 +14,38 @@ import (
 
 var f = flag.String("f", "", "file to autoformat")
 
+func reader() (io.Reader, error) {
+	if *f == "" {
+		return os.Stdin, nil
+	}
+	return os.Open(*f)
+}
+
+func writer() (io.Writer, error) {
+	if *f == "" {
+		return os.Stdout, nil
+	}
+	return os.Create(*f)
+}
+
 func main() {
 	flag.Parse()
-	var err error
-	var r io.Reader = os.Stdin
-	if *f != "" {
-		r, err = os.Open(*f)
-		if err != nil {
-			log.Fatalf("Couldn't open %q: %v", f, err)
-		}
+
+	r, err := reader()
+	if err != nil {
+		log.Fatalf("Couldn't open input: %v", err)
 	}
+
 	out, err := run(r)
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
-	var w io.Writer = os.Stdout
-	if *f != "" {
-		w, err = os.Create(*f)
-		if err != nil {
-			log.Fatalf("Couldn't open %q for write: %v", f, err)
-		}
+
+	w, err := writer()
+	if err != nil {
+		log.Fatalf("Couldn't open for write: %v", err)
 	}
+
 	fmt.Fprint(w, out)
 }
 
@@ -66,7 +77,6 @@ func runLines(lines []string) string {
 }
 
 func clearance(lines []string) int {
-	constraintLine := ""
 	max := 0
 	for _, line := range lines {
 		if !strings.HasPrefix(line, " ") {
@@ -80,10 +90,8 @@ func clearance(lines []string) int {
 		amount := tokens[2]
 		if i := 2 + len(acct) + 2 + dotPosition(amount); i > max {
 			max = i
-			constraintLine = line
 		}
 	}
-	log.Printf("Constraint Line: %q\n", constraintLine)
 	return max
 }
 
