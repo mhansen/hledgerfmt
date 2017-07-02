@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -9,7 +10,7 @@ import (
 )
 
 func TestDiffs(t *testing.T) {
-	for _, c := range []string{"Example", "DotPlacement"} {
+	for _, c := range []string{"Example"} {
 		inFileName := "testdata/" + c + ".in.hledger"
 		inFile, err := os.Open(inFileName)
 		if err != nil {
@@ -21,11 +22,11 @@ func TestDiffs(t *testing.T) {
 			t.Fatalf("Could not open test data %v: %v", wantFileName, err)
 		}
 		want := string(wantBytes)
-		got, err := run(inFile)
-		if err != nil {
+		var b bytes.Buffer
+		if err := run(inFile, &b); err != nil {
 			t.Fatalf("%q: unexpected error in run: %v", c, err)
 		}
-
+		got := b.String()
 		if got != want {
 			diff := difflib.UnifiedDiff{
 				A:        difflib.SplitLines(want),

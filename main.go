@@ -12,68 +12,62 @@ import (
 	"strings"
 )
 
-var f = flag.String("f", "", "file to autoformat")
+var whitespace = regexp.MustCompile("\\s+")
 
-func reader() (io.Reader, error) {
-	if *f == "" {
-		return os.Stdin, nil
-	}
-	return os.Open(*f)
-}
-
-func writer() (io.Writer, error) {
-	if *f == "" {
-		return os.Stdout, nil
-	}
-	return os.Create(*f)
-}
-
-func main() {
-	flag.Parse()
-
-	r, err := reader()
+func runFile(inFile string, outFile string) {
+	r, err := os.Open(inFile)
 	if err != nil {
 		log.Fatalf("Couldn't open input: %v", err)
 	}
 
-	out, err := run(r)
-	if err != nil {
+	var b bytes.Buffer
+	if err = run(r, &b); err != nil {
 		log.Fatalf("Error: %v", err)
 	}
 
-	w, err := writer()
+	w, err := os.Create(outFile)
 	if err != nil {
 		log.Fatalf("Couldn't open for write: %v", err)
 	}
 
-	fmt.Fprint(w, out)
+	fmt.Fprint(w, b.String())
 }
 
-func run(r io.Reader) (string, error) {
+func main() {
+	flag.Parse()
+	args := flag.Args()
+	for _, file := range args {
+		runFile(file, file)
+	}
+	if len(args) == 0 {
+		runFile("/dev/stdin", "/dev/stdout")
+	}
+}
+
+func run(r io.Reader, w io.Writer) error {
 	f, err := ioutil.ReadAll(r)
 	if err != nil {
-		return "", err
+		return err
 	}
 	lines := strings.Split(string(f), "\n")
-	return runLines(lines), nil
+	runLines(lines, w)
+	return nil
 }
 
-func runLines(lines []string) string {
+func runLines(lines []string, w io.Writer) {
 	n := clearance(lines)
 
-	var b bytes.Buffer
 	for i, line := range lines {
 		// Skip the newlines at the end of the file.
 		if i == len(lines)-1 {
 			continue
 		}
 		if !strings.HasPrefix(line, " ") {
-			fmt.Fprintf(&b, "%v\n", line)
+			fmt.Fprintf(w, "%v\n", line)
 			continue
 		}
-		writePostingLine(&b, line, n)
+		writePostingLine(w, line, n)
 	}
-	return b.String()
 }
 
 func clearance(lines []string) int {
@@ -82,7 +76,7 @@ func clearance(lines []string) int {
 		if !strings.HasPrefix(line, " ") {
 			continue
 		}
-		tokens := re.Split(line, -1)
+		tokens := whitespace.Split(line, -1)
 		if len(tokens) == 2 {
 			continue
 		}
@@ -96,7 +90,7 @@ func clearance(lines []string) int {
 }
 
 func writePostingLine(w io.Writer, line string, n int) {
-	tokens := re.Split(line, -1)
+	tokens := whitespace.Split(line, -1)
 
 	// handle account
 	acct := tokens[1]
@@ -137,5 +131,3 @@ func fPrintSpaces(w io.Writer, n int) {
 		fmt.Fprint(w, " ")
 	}
 }
-
-var re = regexp.MustCompile("\\s+")

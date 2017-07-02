@@ -11,4 +11,4 @@
   Assets:Foo  -100
   Assets:Foo   100AUD
   Assets:Foo   100.00USD
-  Expenses:Bar
+  Income:Bar
