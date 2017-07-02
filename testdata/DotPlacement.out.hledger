@@ -1,0 +1,14 @@
+2010/01/02 Test
+  Assets:Foo      .
+  Assets:Foo     1.0
+  Assets:Foo      .0
+  Assets:Foo   100.00
+  Assets:Foo     1
+  Assets:Foo    10
+  Assets:Foo   100
+  Assets:Foo    -1
+  Assets:Foo   -10
+  Assets:Foo  -100
+  Assets:Foo   100AUD
+  Assets:Foo   100.00USD
+  Expenses:Bar

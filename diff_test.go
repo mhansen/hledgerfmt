@@ -9,7 +9,7 @@ import (
 )
 
 func TestDiffs(t *testing.T) {
-	for _, c := range []string{"Example"} {
+	for _, c := range []string{"Example", "DotPlacement"} {
 		inFileName := "testdata/" + c + ".in.hledger"
 		inFile, err := os.Open(inFileName)
 		if err != nil {
