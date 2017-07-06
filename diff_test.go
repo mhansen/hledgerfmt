@@ -10,7 +10,7 @@ import (
 )
 
 func TestDiffs(t *testing.T) {
-	for _, c := range []string{"Example"} {
+	for _, c := range []string{"Example", "DotPlacement", "Commas"} {
 		inFileName := "testdata/" + c + ".in.hledger"
 		inFile, err := os.Open(inFileName)
 		if err != nil {
@@ -28,14 +28,13 @@ func TestDiffs(t *testing.T) {
 		}
 		got := b.String()
 		if got != want {
-			diff := difflib.UnifiedDiff{
+			text, err := difflib.GetUnifiedDiffString(difflib.UnifiedDiff{
 				A:        difflib.SplitLines(want),
 				B:        difflib.SplitLines(got),
 				FromFile: "Want",
 				ToFile:   "Got",
 				Context:  5,
-			}
-			text, err := difflib.GetUnifiedDiffString(diff)
+			})
 			if err != nil {
 				t.Fatalf("%q: unexpected error in GetUnifiedDiffString: %v", c, err)
 			}
