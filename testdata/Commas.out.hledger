@@ -1,12 +1,12 @@
 2010/01/02 Test
-  Assets:Foo                 -.23
-  Assets:Foo                 1
-  Assets:Foo  -100,000,000,000.0000
-  Assets:Foo  -100,000,000,000.0000
-  Assets:Foo             1,000AUD
-  Assets:Foo             1,000AUD
-  Assets:Foo             1,000 AUD
-  Assets:Foo             1,000 AUD
-  Assets:Foo             1,000.00 USD @ 1 EUR
-  Assets:Foo             1,000.00 USD @ 1 EUR
+  Assets:Foo              -.23
+  Assets:Foo              1
+  Assets:Foo  -100000000000.0000
+  Assets:Foo  -100000000000.0000
+  Assets:Foo           1000AUD
+  Assets:Foo           1000AUD
+  Assets:Foo           1000 AUD
+  Assets:Foo           1000 AUD
+  Assets:Foo           1000.00 USD @ 1 EUR
+  Assets:Foo           1000.00 USD @ 1 EUR
   Income:Bar

@@ -9,10 +9,7 @@ import (
 	"log"
 	"os"
 	"regexp"
-	"strconv"
 	"strings"
-
-	humanize "github.com/dustin/go-humanize"
 )
 
 var whitespace = regexp.MustCompile("\\s+")
@@ -53,14 +50,12 @@ func run(r io.Reader, w io.Writer) error {
 		return err
 	}
 	lines := strings.Split(string(f), "\n")
-	return runLines(lines, w)
+	runLines(lines, w)
+	return nil
 }
 
-func runLines(lines []string, w io.Writer) error {
-	n, err := clearance(lines)
-	if err != nil {
-		return fmt.Errorf("couldn't calculate clearance for line: %q", err)
-	}
+func runLines(lines []string, w io.Writer) {
+	n := clearance(lines)
 
 	for i, line := range lines {
 		// Skip the newlines at the end of the file.
@@ -71,15 +66,11 @@ func runLines(lines []string, w io.Writer) error {
 			fmt.Fprintf(w, "%v\n", line)
 			continue
 		}
-		err := writePostingLine(w, line, n)
-		if err != nil {
-			return fmt.Errorf("error on line %v: %v", i, err)
-		}
+		writePostingLine(w, line, n)
 	}
-	return nil
 }
 
-func clearance(lines []string) (int, error) {
+func clearance(lines []string) int {
 	max := 0
 	for _, line := range lines {
 		if !strings.HasPrefix(line, " ") {
@@ -90,39 +81,21 @@ func clearance(lines []string) (int, error) {
 			continue
 		}
 		acct := tokens[1]
-		amount, err := addCommas(tokens[2])
-		if err != nil {
-			return 0, fmt.Errorf("couldn't add comma to line %q: %v", line, err)
-		}
+		amount := removeCommas(tokens[2])
 		if i := 2 + len(acct) + 2 + dotPosition(amount); i > max {
 			max = i
 		}
 	}
-	return max, nil
+	return max
 }
 
 var startNumbers = regexp.MustCompile("^([-0-9]*)(.*)$")
 
-func addCommas(amount string) (string, error) {
-	// grab the digits off the front, including commas and minuses (not dots, everything after the decimal we leave)
-	digitsParts := startNumbers.FindStringSubmatch(amount)
-	numbersAtStart := digitsParts[1]
-	endBit := digitsParts[2]
-	if numbersAtStart == "" || numbersAtStart == "-" {
-		return amount, nil
-	}
-
-	// parse it into an integer
-	numbers, err := strconv.ParseInt(numbersAtStart, 10, 64)
-	if err != nil {
-		return "", fmt.Errorf("couldn't parse number %q from amount %q: %v", numbers, amount, err)
-	}
-
-	// format it with commas
-	return humanize.Comma(numbers) + endBit, nil
+func removeCommas(amount string) string {
+	return strings.Replace(amount, ",", "", -1)
 }
 
-func writePostingLine(w io.Writer, line string, n int) error {
+func writePostingLine(w io.Writer, line string, n int) {
 	tokens := whitespace.Split(line, -1)
 
 	// handle account
@@ -130,14 +103,11 @@ func writePostingLine(w io.Writer, line string, n int) error {
 	fmt.Fprintf(w, "  %v", acct)
 	if len(tokens) == 2 {
 		fmt.Fprint(w, "\n")
-		return nil
+		return
 	}
 
 	// handle amount
-	amount, err := addCommas(tokens[2])
-	if err != nil {
-		return fmt.Errorf("couldn't add comma to line %q: %v", line, err)
-	}
+	amount := removeCommas(tokens[2])
 	fmt.Fprint(w, "  ")
 	if idx := dotPosition(amount); idx != -1 {
 		charsSoFar := 2 + len(acct) + 2 + idx
@@ -150,7 +120,6 @@ func writePostingLine(w io.Writer, line string, n int) error {
 		fmt.Fprintf(w, " %v", tokens[i])
 	}
 	fmt.Fprint(w, "\n")
-	return nil
 }
 
 func dotPosition(s string) int {
