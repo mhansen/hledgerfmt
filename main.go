@@ -108,7 +108,7 @@ func addCommas(amount string) (string, error) {
 	digitsParts := startNumbers.FindStringSubmatch(amount)
 	numbersAtStart := digitsParts[1]
 	endBit := digitsParts[2]
-	if numbersAtStart == "" {
+	if numbersAtStart == "" || numbersAtStart == "-" {
 		return amount, nil
 	}
 
